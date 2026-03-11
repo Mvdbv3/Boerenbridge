@@ -1,1 +1,1277 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>React App</title><script defer="defer" src="/static/js/main.77839a7e.js"></script><link href="/static/css/main.0ef7fdd1.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Boerenbridge" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Boerenbridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #22223a;
+      --surface3: #2a2a45;
+      --accent: #e8c547;
+      --accent2: #5b8dee;
+      --green: #4ade80;
+      --orange: #fb923c;
+      --red: #f87171;
+      --text: #f0f0f8;
+      --text2: #9090b0;
+      --border: rgba(255,255,255,0.07);
+      --radius: 14px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      overscroll-behavior: none;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+    }
+    .topbar-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      background: var(--surface2);
+      border: none;
+      color: var(--text2);
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .icon-btn:active { background: var(--surface3); color: var(--text); }
+
+    /* SCREENS */
+    .screen { display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 16px 20px 24px; gap: 16px; }
+    .screen.active { display: flex; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 12px;
+    }
+
+    /* INPUTS */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .input-row:last-child { border-bottom: none; }
+    .drag-handle { color: var(--text2); font-size: 14px; cursor: grab; padding: 4px; }
+    input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+    }
+    input[type="text"]::placeholder { color: var(--text2); }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 2px 4px;
+      opacity: 0.7;
+    }
+    .remove-btn:active { opacity: 1; }
+
+    /* STEPPER */
+    .stepper-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+    .stepper-row + .stepper-row { border-top: 1px solid var(--border); }
+    .stepper-label { font-size: 14px; color: var(--text2); }
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .stepper button {
+      background: none;
+      border: none;
+      color: var(--text);
+      width: 36px; height: 36px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.1s;
+    }
+    .stepper button:active { background: var(--surface3); }
+    .stepper-val {
+      min-width: 32px;
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* BUTTONS */
+    .btn {
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.9; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #0f0f1a; }
+    .btn-secondary { background: var(--surface2); color: var(--text2); }
+    .btn-green { background: var(--green); color: #0f0f1a; }
+    .btn-danger { background: var(--red); color: #0f0f1a; }
+
+    /* ADD PLAYER */
+    .add-player-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      color: var(--text2);
+      padding: 10px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* DEALER SELECT */
+    .dealer-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .dealer-option:last-child { border-bottom: none; }
+    .dealer-name { font-size: 15px; }
+    .dealer-badges { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .badge-orange { background: rgba(232,197,71,0.15); color: var(--accent); }
+    .badge-blue { background: rgba(91,141,238,0.15); color: var(--accent2); }
+    .badge-check { color: var(--accent); font-size: 18px; margin-left: 10px; }
+
+    /* ROUND HEADER */
+    .round-header {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+      text-align: center;
+    }
+    .round-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .round-header .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+    .round-meta {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* TOTALS BANNER */
+    .totals-banner {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .totals-banner.warn {
+      border-color: var(--orange);
+      background: rgba(251,146,60,0.08);
+    }
+    .totals-banner.ok {
+      border-color: var(--green);
+      background: rgba(74,222,128,0.08);
+    }
+    .totals-label { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; }
+    .totals-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .totals-right { text-align: right; }
+    .totals-status { font-size: 13px; font-weight: 600; }
+
+    /* PLAYER ROWS */
+    .player-row {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .player-row.active-bidder {
+      border-color: var(--accent2);
+      background: rgba(91,141,238,0.07);
+    }
+    .player-row-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .player-row-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+    }
+    .player-row-result { font-size: 14px; font-weight: 600; }
+    .numbers-scroll {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .numbers-scroll::-webkit-scrollbar { display: none; }
+    .num-btn {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.1s, border-color 0.1s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .num-btn:active { transform: scale(0.92); }
+    .num-btn.selected-bid { background: var(--accent2); border-color: var(--accent2); color: white; }
+    .num-btn.selected-ok { background: var(--green); border-color: var(--green); color: #0f0f1a; }
+    .num-btn.selected-wrong { background: var(--orange); border-color: var(--orange); color: #0f0f1a; }
+    .num-btn.forbidden {
+      opacity: 0.3;
+      border-color: var(--red);
+      cursor: not-allowed;
+      position: relative;
+    }
+    .forbidden-line {
+      position: absolute;
+      width: 70%; height: 2px;
+      background: var(--red);
+      transform: rotate(-45deg);
+      border-radius: 2px;
+    }
+
+    /* SCORE PREVIEW */
+    .score-preview {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .score-preview-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text2);
+      padding: 12px 14px 8px;
+    }
+    .score-preview-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .score-preview-name { font-size: 14px; }
+    .score-preview-detail { font-size: 12px; color: var(--text2); }
+    .score-preview-pts {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    /* SCOREBOARD */
+    .scoreboard-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text2);
+      padding: 8px 10px;
+      background: var(--surface2);
+      white-space: nowrap;
+      text-align: center;
+    }
+    th:first-child { text-align: left; }
+    td {
+      padding: 8px 10px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      white-space: nowrap;
+    }
+    td:first-child { text-align: left; color: var(--text2); font-size: 12px; }
+    tr.current-round td { background: rgba(232,197,71,0.05); }
+    .td-score { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+    .td-round-score { font-size: 11px; color: var(--text2); }
+    .td-correct { color: var(--green); }
+    .td-wrong { color: var(--orange); }
+    tfoot td {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      background: var(--surface2);
+      border-top: 2px solid var(--border);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text2);
+      padding: 8px;
+      border-radius: 9px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .tab.active {
+      background: var(--surface3);
+      color: var(--text);
+    }
+
+    /* FINISHED */
+    .winner-card {
+      background: linear-gradient(135deg, rgba(232,197,71,0.15) 0%, rgba(232,197,71,0.05) 100%);
+      border: 1px solid rgba(232,197,71,0.3);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .winner-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .podium-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 10px;
+      gap: 10px;
+    }
+    .podium-rank {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      width: 28px;
+      color: var(--text2);
+    }
+    .podium-name { flex: 1; font-size: 16px; }
+    .podium-score {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .podium-row.first {
+      background: rgba(232,197,71,0.1);
+      border: 1px solid rgba(232,197,71,0.2);
+    }
+    .podium-row.first .podium-rank { color: var(--accent); }
+    .podium-row.first .podium-score { color: var(--accent); }
+
+    /* SETTINGS */
+    .settings-section { margin-bottom: 20px; }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row label { font-size: 14px; color: var(--text2); }
+
+    /* TOGGLE */
+    .toggle { position: relative; width: 44px; height: 26px; }
+    .toggle input { display: none; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--surface3);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--accent2); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px calc(20px + var(--safe-bottom));
+      width: 100%;
+      max-width: 480px;
+      border: 1px solid var(--border);
+      border-bottom: none;
+    }
+    .modal h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .modal-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+
+    /* HINT */
+    .hint { font-size: 12px; color: var(--text2); text-align: center; padding: 8px; }
+
+    .error-msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--red);
+    }
+
+    /* DRAGGING */
+    .dragging { opacity: 0.4; }
+    .drag-over { border-top: 2px solid var(--accent); }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f4f8;
+        --surface: #ffffff;
+        --surface2: #ebebf2;
+        --surface3: #dcdce8;
+        --text: #1a1a2e;
+        --text2: #6060808;
+        --border: rgba(0,0,0,0.08);
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <h1>🃏 Boerenbridge</h1>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="settingsBtn" title="Instellingen">⚙️</button>
+      <button class="icon-btn" id="newGameBtn" title="Nieuw spel" style="display:none">＋</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Setup spelers -->
+  <div class="screen active" id="screen-setup">
+    <div class="card">
+      <div class="card-title">Spelers — sleep om volgorde te wijzigen</div>
+      <div id="playerList"></div>
+      <button class="add-player-btn" id="addPlayerBtn">＋ Speler toevoegen</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rondes</div>
+      <div class="stepper-row">
+        <span class="stepper-label">Vanaf</span>
+        <div class="stepper">
+          <button onclick="changeCards('min',-1)">−</button>
+          <span class="stepper-val" id="minCardsVal">1</span>
+          <button onclick="changeCards('min',1)">＋</button>
+        </div>
+      </div>
+      <div class="stepper-row">
+        <span class="stepper-label">Tot</span>
+        <div class="stepper">
+          <button onclick="changeCards('max',-1)">−</button>
+          <span class="stepper-val" id="maxCardsVal">8</span>
+          <button onclick="changeCards('max',1)">＋</button>
+        </div>
+      </div>
+      <p class="hint" id="roundsHint"></p>
+    </div>
+
+    <button class="btn btn-primary" id="toDealer">Volgende: Dealer kiezen →</button>
+  </div>
+
+  <!-- SCREEN: Dealer kiezen -->
+  <div class="screen" id="screen-dealer">
+    <div class="card">
+      <div class="card-title">Wie is de eerste dealer?</div>
+      <div id="dealerList"></div>
+      <p class="hint">De dealer roteert elke ronde met de klok mee.<br>De speler ná de dealer biedt als eerste.</p>
+    </div>
+    <button class="btn btn-secondary" onclick="showScreen('setup')">← Terug</button>
+    <button class="btn btn-primary" id="startGameBtn">Spel starten 🎴</button>
+  </div>
+
+  <!-- SCREEN: Game -->
+  <div class="screen" id="screen-game">
+    <div class="tabs">
+      <button class="tab active" id="tabRonde" onclick="switchTab('ronde')">Huidige ronde</button>
+      <button class="tab" id="tabScore" onclick="switchTab('score')">Scorebord</button>
+    </div>
+
+    <div id="gameContent"></div>
+    <div id="scoreContent" style="display:none"></div>
+  </div>
+
+  <!-- SCREEN: Finished -->
+  <div class="screen" id="screen-finished">
+    <div id="finishedContent"></div>
+    <button class="btn btn-primary" onclick="resetGame()">Nieuw spel</button>
+  </div>
+</div>
+
+<!-- Modal: nieuw spel bevestigen -->
+<div class="modal-overlay" id="newGameModal">
+  <div class="modal">
+    <h3>Nieuw spel starten?</h3>
+    <p style="color:var(--text2);font-size:14px">Het huidige spel gaat verloren.</p>
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="confirmNewGame()">Ja, nieuw spel</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>⚙️ Instellingen</h3>
+    <div class="settings-section">
+      <div class="card-title">Goed geraden (bod = slagen)</div>
+      <div class="settings-row">
+        <label>Bonus punten</label>
+        <div class="stepper">
+          <button onclick="changeSetting('correctBonus',-1)">−</button>
+          <span class="stepper-val" id="settingCorrectBonus">10</span>
+          <button onclick="changeSetting('correctBonus',1)">＋</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>+ slagen als bonus</label>
+        <label class="toggle">
+          <input type="checkbox" id="settingCorrectPerTrick" checked>
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+      </div>
+      <p class="hint" id="correctExample"></p>
+    </div>
+    <div class="settings-section">
+      <div class="card-title">Fout geraden (bod ≠ slagen)</div>
+      <div class="settings-row">
+        <label>Bonus punten</label>
+        <div class="stepper">
+          <button onclick="changeSetting('incorrectBonus',-1)">−</button>
+          <span class="stepper-val" id="settingIncorrectBonus">0</span>
+          <button onclick="changeSetting('incorrectBonus',1)">＋</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>+ slagen als troostprijs</label>
+        <label class="toggle">
+          <input type="checkbox" id="settingIncorrectPerTrick" checked>
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+      </div>
+      <p class="hint" id="incorrectExample"></p>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="saveSettings()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  players: ['', '', '', ''],
+  minCards: 1,
+  maxCards: 8,
+  firstDealerIndex: 0,
+  settings: { correctBonus: 10, correctPerTrick: true, incorrectBonus: 0, incorrectPerTrick: true }
+};
+
+let game = null; // active game object
+
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+function saveGame() {
+  if (game) localStorage.setItem('bb_game', JSON.stringify(game));
+  localStorage.setItem('bb_settings', JSON.stringify(state.settings));
+}
+
+function loadGame() {
+  const g = localStorage.getItem('bb_game');
+  const s = localStorage.getItem('bb_settings');
+  if (s) state.settings = JSON.parse(s);
+  if (g) {
+    game = JSON.parse(g);
+    if (!game.isFinished) {
+      showScreen('game');
+      renderGame();
+    } else {
+      showScreen('finished');
+      renderFinished();
+    }
+  } else {
+    renderSetup();
+  }
+}
+
+// ─── SCORE ───────────────────────────────────────────────────────────────────
+function calcScore(bid, tricks) {
+  const s = state.settings;
+  if (bid === tricks) return s.correctBonus + (s.correctPerTrick ? tricks : 0);
+  return s.incorrectBonus + (s.incorrectPerTrick ? tricks : 0);
+}
+
+function totalScore(playerIdx, upToRound) {
+  let total = 0;
+  const limit = upToRound !== undefined ? upToRound : game.rounds.length;
+  for (let i = 0; i < limit; i++) {
+    const r = game.rounds[i];
+    if (r.phase !== 'completed') continue;
+    const e = r.entries[playerIdx];
+    if (e.bid !== null && e.tricks !== null) total += calcScore(e.bid, e.tricks);
+  }
+  return total;
+}
+
+// ─── ROUND SEQUENCE ──────────────────────────────────────────────────────────
+function roundSequence(minC, maxC) {
+  const seq = [];
+  for (let i = minC; i <= maxC; i++) seq.push(i);
+  for (let i = maxC - 1; i >= minC; i--) seq.push(i);
+  return seq;
+}
+
+function dealerIndex(roundIdx) {
+  return (game.firstDealerIndex + roundIdx) % game.players.length;
+}
+
+function firstBidderIndex(roundIdx) {
+  return (dealerIndex(roundIdx) + 1) % game.players.length;
+}
+
+// ─── SETUP SCREEN ────────────────────────────────────────────────────────────
+function renderSetup() {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  state.players.forEach((name, i) => {
+    const row = document.createElement('div');
+    row.className = 'input-row';
+    row.draggable = true;
+    row.dataset.index = i;
+    row.innerHTML = `
+      <span class="drag-handle">☰</span>
+      <input type="text" placeholder="Speler ${i+1}" value="${name}" oninput="state.players[${i}]=this.value;updateSetupBtn()">
+      ${i >= 2 ? `<button class="remove-btn" onclick="removePlayer(${i})">✕</button>` : ''}
+    `;
+    setupDrag(row, i);
+    list.appendChild(row);
+  });
+  updateSetupBtn();
+  updateRoundsHint();
+  document.getElementById('minCardsVal').textContent = state.minCards;
+  document.getElementById('maxCardsVal').textContent = state.maxCards;
+}
+
+function setupDrag(el, idx) {
+  el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', idx); el.classList.add('dragging'); });
+  el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    const from = parseInt(e.dataTransfer.getData('text/plain'));
+    const to = idx;
+    if (from !== to) {
+      const tmp = state.players[from]; state.players[from] = state.players[to]; state.players[to] = tmp;
+      renderSetup();
+    }
+  });
+}
+
+function removePlayer(i) {
+  state.players.splice(i, 1);
+  renderSetup();
+}
+
+document.getElementById('addPlayerBtn').onclick = () => {
+  if (state.players.length < 8) { state.players.push(''); renderSetup(); }
+};
+
+function validPlayers() {
+  return state.players.map(p => p.trim()).filter(p => p.length > 0);
+}
+
+function updateSetupBtn() {
+  document.getElementById('toDealer').disabled = validPlayers().length < 2;
+}
+
+function changeCards(type, delta) {
+  if (type === 'min') {
+    state.minCards = Math.max(1, Math.min(13, state.minCards + delta));
+    if (state.minCards > state.maxCards) state.maxCards = state.minCards;
+  } else {
+    state.maxCards = Math.max(1, Math.min(13, state.maxCards + delta));
+    if (state.maxCards < state.minCards) state.minCards = state.maxCards;
+  }
+  document.getElementById('minCardsVal').textContent = state.minCards;
+  document.getElementById('maxCardsVal').textContent = state.maxCards;
+  updateRoundsHint();
+}
+
+function updateRoundsHint() {
+  const seq = roundSequence(state.minCards, state.maxCards);
+  document.getElementById('roundsHint').textContent =
+    `Verloop: ${state.minCards}→${state.maxCards}→${state.minCards} — ${seq.length} rondes`;
+}
+
+document.getElementById('toDealer').onclick = () => {
+  if (state.firstDealerIndex >= validPlayers().length) state.firstDealerIndex = 0;
+  renderDealerScreen();
+  showScreen('dealer');
+};
+
+// ─── DEALER SCREEN ───────────────────────────────────────────────────────────
+function renderDealerScreen() {
+  const players = validPlayers();
+  const list = document.getElementById('dealerList');
+  list.innerHTML = '';
+  players.forEach((name, i) => {
+    const isSelected = i === state.firstDealerIndex;
+    const nextIdx = (i + 1) % players.length;
+    const div = document.createElement('div');
+    div.className = 'dealer-option';
+    div.onclick = () => { state.firstDealerIndex = i; renderDealerScreen(); };
+    div.innerHTML = `
+      <div>
+        <div class="dealer-name">${name}</div>
+        ${isSelected ? `<div style="margin-top:4px;display:flex;gap:6px">
+          <span class="badge badge-orange">Dealer ronde 1</span>
+          <span class="badge badge-blue">→ ${players[nextIdx]} biedt eerst</span>
+        </div>` : ''}
+      </div>
+      ${isSelected ? '<span class="badge-check">✓</span>' : ''}
+    `;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('startGameBtn').onclick = startGame;
+
+// ─── START GAME ──────────────────────────────────────────────────────────────
+function startGame() {
+  const players = validPlayers();
+  const seq = roundSequence(state.minCards, state.maxCards);
+  game = {
+    players,
+    firstDealerIndex: state.firstDealerIndex,
+    currentRoundIndex: 0,
+    isFinished: false,
+    rounds: seq.map((cards, i) => ({
+      roundNumber: i + 1,
+      cards,
+      phase: 'bidding',
+      entries: players.map(() => ({ bid: null, tricks: null }))
+    }))
+  };
+  saveGame();
+  document.getElementById('newGameBtn').style.display = '';
+  showScreen('game');
+  switchTab('ronde');
+  renderGame();
+}
+
+// ─── GAME SCREEN ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tabRonde').classList.toggle('active', tab === 'ronde');
+  document.getElementById('tabScore').classList.toggle('active', tab === 'score');
+  document.getElementById('gameContent').style.display = tab === 'ronde' ? '' : 'none';
+  document.getElementById('scoreContent').style.display = tab === 'score' ? '' : 'none';
+  if (tab === 'score') renderScoreboard();
+}
+
+function renderGame() {
+  const ri = game.currentRoundIndex;
+  if (ri >= game.rounds.length) { finishGame(); return; }
+  const round = game.rounds[ri];
+  const content = document.getElementById('gameContent');
+
+  const dIdx = dealerIndex(ri);
+  const fbIdx = firstBidderIndex(ri);
+
+  let html = `
+    <div class="round-header">
+      <h2>Ronde ${round.roundNumber}</h2>
+      <div class="sub">${round.cards} kaart${round.cards === 1 ? '' : 'en'} per speler</div>
+      <div class="round-meta">
+        <span class="badge badge-orange">🃏 Dealer: ${game.players[dIdx]}</span>
+        <span class="badge badge-blue">✋ Eerst: ${game.players[fbIdx]}</span>
+      </div>
+    </div>
+  `;
+
+  if (round.phase === 'bidding') {
+    html += renderBiddingPhase(round, ri);
+  } else if (round.phase === 'tricks') {
+    html += renderTricksPhase(round, ri);
+  }
+
+  content.innerHTML = html;
+}
+
+function renderBiddingPhase(round, ri) {
+  const entries = round.entries;
+  const totalBids = entries.reduce((s, e) => s + (e.bid ?? 0), 0);
+  const filledCount = entries.filter(e => e.bid !== null).length;
+  const remaining = round.cards - totalBids;
+  const isExact = totalBids === round.cards;
+
+  let bannerClass = isExact ? 'warn' : '';
+  let statusText = filledCount < game.players.length
+    ? `${remaining > 0 ? '+' : ''}${remaining} vrij`
+    : 'Iedereen geboden';
+  let statusColor = isExact ? 'color:var(--orange)' : (remaining < 0 ? 'color:var(--red)' : 'color:var(--green)');
+
+  let html = `
+    <div class="totals-banner ${bannerClass}">
+      <div>
+        <div class="totals-label">TOTAAL GEBODEN</div>
+        <div class="totals-num" style="${isExact ? 'color:var(--orange)' : ''}">${totalBids}<span style="font-size:16px;color:var(--text2)"> / ${round.cards}</span></div>
+      </div>
+      <div class="totals-right">
+        <div class="totals-label">${filledCount < game.players.length ? `${game.players.length - filledCount} nog te bieden` : 'Klaar'}</div>
+        <div class="totals-status" style="${statusColor}">${statusText}</div>
+      </div>
+    </div>
+  `;
+
+  // Determine order starting from first bidder
+  const fbIdx = firstBidderIndex(ri);
+  const orderedIndices = [];
+  for (let k = 0; k < game.players.length; k++) {
+    orderedIndices.push((fbIdx + k) % game.players.length);
+  }
+
+  const isLastPlayerTurn = filledCount === game.players.length - 1;
+  const forbiddenBid = isLastPlayerTurn ? (round.cards - totalBids) : null;
+
+  orderedIndices.forEach(i => {
+    const e = entries[i];
+    const isDealer = i === dealerIndex(ri);
+    const isFirst = i === fbIdx;
+    const isCurrent = e.bid === null && entries.slice(0, i).every(x => // determine whose turn via ordered check
+      orderedIndices.indexOf(i) === orderedIndices.findIndex(j => game.rounds[game.currentRoundIndex].entries[j].bid === null)
+    );
+    const isCurrentTurn = e.bid === null && orderedIndices.findIndex(j => entries[j].bid === null) === orderedIndices.indexOf(i);
+    const isThisLast = isLastPlayerTurn && e.bid === null;
+
+    html += `<div class="player-row ${isCurrentTurn ? 'active-bidder' : ''}">
+      <div class="player-row-top">
+        <span class="player-row-name">${game.players[i]}</span>
+        ${isDealer ? '<span class="badge badge-orange">Dealer</span>' : ''}
+        ${isFirst ? '<span class="badge badge-blue">Eerst</span>' : ''}
+        ${e.bid !== null ? `<span class="player-row-result" style="color:var(--accent2)">Bod: ${e.bid}</span>` : ''}
+      </div>
+      ${isThisLast ? `<div style="font-size:12px;color:var(--orange);margin-bottom:8px">⚠️ Mag niet op ${round.cards} uitkomen</div>` : ''}
+      <div class="numbers-scroll">`;
+
+    for (let n = 0; n <= round.cards; n++) {
+      const isForbidden = isThisLast && n === forbiddenBid;
+      const isSelected = e.bid === n;
+      let cls = 'num-btn';
+      if (isForbidden) cls += ' forbidden';
+      else if (isSelected) cls += ' selected-bid';
+      html += `<button class="${cls}" ${isForbidden ? 'disabled' : ''} onclick="setBid(${i},${n})">${n}${isForbidden ? '<div class="forbidden-line"></div>' : ''}</button>`;
+    }
+    html += `</div></div>`;
+  });
+
+  const allFilled = filledCount === game.players.length;
+  html += `<button class="btn btn-green" ${!allFilled ? 'disabled' : ''} onclick="proceedToTricks()">Naar slagen invoeren →</button>`;
+  return html;
+}
+
+function renderTricksPhase(round, ri) {
+  const entries = round.entries;
+  const totalTricks = entries.reduce((s, e) => s + (e.tricks ?? 0), 0);
+  const filledCount = entries.filter(e => e.tricks !== null).length;
+  const allFilled = filledCount === game.players.length;
+  const tricksOk = totalTricks === round.cards;
+
+  let html = `
+    <div class="totals-banner ${allFilled ? (tricksOk ? 'ok' : 'warn') : ''}">
+      <div>
+        <div class="totals-label">TOTAAL SLAGEN</div>
+        <div class="totals-num" style="${allFilled && !tricksOk ? 'color:var(--red)' : allFilled ? 'color:var(--green)' : ''}">${totalTricks}<span style="font-size:16px;color:var(--text2)"> / ${round.cards}</span></div>
+      </div>
+      <div class="totals-right">
+        ${allFilled
+          ? `<div class="totals-status" style="${tricksOk ? 'color:var(--green)' : 'color:var(--red)'}">${tricksOk ? '✓ Klopt!' : '✗ Fout'}</div>`
+          : `<div class="totals-label">${game.players.length - filledCount} nog in te vullen</div>`
+        }
+      </div>
+    </div>
+  `;
+
+  entries.forEach((e, i) => {
+    const bid = e.bid ?? 0;
+    const isCorrect = e.tricks !== null && e.tricks === bid;
+    const isWrong = e.tricks !== null && e.tricks !== bid;
+    html += `<div class="player-row">
+      <div class="player-row-top">
+        <span class="player-row-name">${game.players[i]}</span>
+        <span style="font-size:12px;color:var(--text2)">Bod: ${bid}</span>
+        ${isCorrect ? '<span class="player-row-result" style="color:var(--green)">✓</span>' : ''}
+        ${isWrong ? '<span class="player-row-result" style="color:var(--orange)">✗</span>' : ''}
+      </div>
+      <div class="numbers-scroll">`;
+    for (let n = 0; n <= round.cards; n++) {
+      const isSelected = e.tricks === n;
+      let cls = 'num-btn';
+      if (isSelected) cls += isSelected && n === bid ? ' selected-ok' : ' selected-wrong';
+      html += `<button class="${cls}" onclick="setTricks(${i},${n})">${n}</button>`;
+    }
+    html += `</div></div>`;
+  });
+
+  // Score preview when all filled
+  if (allFilled) {
+    html += `<div class="score-preview">
+      <div class="score-preview-title">Scores deze ronde</div>`;
+    entries.forEach((e, i) => {
+      const bid = e.bid ?? 0, tricks = e.tricks ?? 0;
+      const score = calcScore(bid, tricks);
+      const correct = bid === tricks;
+      html += `<div class="score-preview-row">
+        <div>
+          <div class="score-preview-name">${game.players[i]}</div>
+          <div class="score-preview-detail">Bod ${bid} → ${tricks} slagen</div>
+        </div>
+        <div class="td-score ${correct ? 'td-correct' : 'td-wrong'}">+${score}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    if (!tricksOk) {
+      html += `<div class="error-msg">⚠️ Totaal slagen moet ${round.cards} zijn (nu ${totalTricks}). Pas aan om door te gaan.</div>`;
+    }
+
+    html += `<button class="btn btn-primary" ${!tricksOk ? 'disabled' : ''} onclick="finishRound()" style="${!tricksOk ? '' : ''}">Ronde afsluiten 🏁</button>`;
+  }
+
+  return html;
+}
+
+// ─── GAME ACTIONS ─────────────────────────────────────────────────────────────
+function setBid(playerIdx, value) {
+  game.rounds[game.currentRoundIndex].entries[playerIdx].bid = value;
+  saveGame();
+  renderGame();
+}
+
+function setTricks(playerIdx, value) {
+  game.rounds[game.currentRoundIndex].entries[playerIdx].tricks = value;
+  saveGame();
+  renderGame();
+}
+
+function proceedToTricks() {
+  game.rounds[game.currentRoundIndex].phase = 'tricks';
+  saveGame();
+  renderGame();
+}
+
+function finishRound() {
+  const ri = game.currentRoundIndex;
+  const round = game.rounds[ri];
+  const totalTricks = round.entries.reduce((s, e) => s + (e.tricks ?? 0), 0);
+  if (totalTricks !== round.cards) return;
+  game.rounds[ri].phase = 'completed';
+  game.currentRoundIndex++;
+  if (game.currentRoundIndex >= game.rounds.length) {
+    finishGame();
+  } else {
+    saveGame();
+    renderGame();
+  }
+}
+
+function finishGame() {
+  game.isFinished = true;
+  saveGame();
+  showScreen('finished');
+  renderFinished();
+}
+
+// ─── SCOREBOARD ──────────────────────────────────────────────────────────────
+function renderScoreboard() {
+  const completedRounds = game.rounds.filter(r => r.phase === 'completed');
+  const el = document.getElementById('scoreContent');
+  if (completedRounds.length === 0) {
+    el.innerHTML = '<p class="hint">Nog geen rondes afgerond.</p>';
+    return;
+  }
+
+  let html = '<div class="scoreboard-wrap"><table><thead><tr><th>Ronde</th>';
+  game.players.forEach(p => { html += `<th>${p}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  game.rounds.forEach((round, ri) => {
+    if (round.phase !== 'completed') return;
+    html += `<tr><td>R${round.roundNumber}<br><span style="font-size:10px">${round.cards}k</span></td>`;
+    game.players.forEach((_, pi) => {
+      const e = round.entries[pi];
+      const bid = e.bid ?? 0, tricks = e.tricks ?? 0;
+      const score = calcScore(bid, tricks);
+      const correct = bid === tricks;
+      const cumul = totalScore(pi, ri + 1);
+      html += `<td>
+        <div class="td-round-score ${correct ? 'td-correct' : 'td-wrong'}">+${score}</div>
+        <div class="td-score">${cumul}</div>
+      </td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody><tfoot><tr><td>Totaal</td>';
+  game.players.forEach((_, pi) => {
+    html += `<td>${totalScore(pi)}</td>`;
+  });
+  html += '</tr></tfoot></table></div>';
+  el.innerHTML = html;
+}
+
+// ─── FINISHED ────────────────────────────────────────────────────────────────
+function renderFinished() {
+  document.getElementById('newGameBtn').style.display = '';
+  const sorted = game.players.map((name, i) => ({ name, score: totalScore(i) }))
+    .sort((a, b) => b.score - a.score);
+
+  let html = `<div class="winner-card">
+    <div class="winner-title">🏆 ${sorted[0].name} wint!</div>
+    <div style="color:var(--text2);font-size:13px;margin-top:4px">${sorted[0].score} punten</div>
+  </div>`;
+
+  sorted.forEach((p, i) => {
+    const medals = ['🥇', '🥈', '🥉'];
+    html += `<div class="podium-row ${i === 0 ? 'first' : ''}">
+      <div class="podium-rank">${medals[i] || i + 1}</div>
+      <div class="podium-name">${p.name}</div>
+      <div class="podium-score">${p.score}</div>
+    </div>`;
+  });
+
+  document.getElementById('finishedContent').innerHTML = html;
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+document.getElementById('settingsBtn').onclick = () => {
+  const s = state.settings;
+  document.getElementById('settingCorrectBonus').textContent = s.correctBonus;
+  document.getElementById('settingIncorrectBonus').textContent = s.incorrectBonus;
+  document.getElementById('settingCorrectPerTrick').checked = s.correctPerTrick;
+  document.getElementById('settingIncorrectPerTrick').checked = s.incorrectPerTrick;
+  updateSettingsExamples();
+  document.getElementById('settingsModal').classList.add('active');
+};
+
+function changeSetting(key, delta) {
+  state.settings[key] = Math.max(0, state.settings[key] + delta);
+  document.getElementById('setting' + key.charAt(0).toUpperCase() + key.slice(1)).textContent = state.settings[key];
+  updateSettingsExamples();
+}
+
+function updateSettingsExamples() {
+  const s = state.settings;
+  document.getElementById('correctExample').textContent =
+    `Voorbeeld: bod 3, slagen 3 → ${s.correctBonus}${s.correctPerTrick ? ` + 3 = ${s.correctBonus + 3}` : ''} punten`;
+  document.getElementById('incorrectExample').textContent =
+    `Voorbeeld: bod 3, slagen 1 → ${s.incorrectBonus}${s.incorrectPerTrick ? ` + 1 = ${s.incorrectBonus + 1}` : ''} punten`;
+}
+
+document.getElementById('settingCorrectPerTrick').onchange = (e) => {
+  state.settings.correctPerTrick = e.target.checked; updateSettingsExamples();
+};
+document.getElementById('settingIncorrectPerTrick').onchange = (e) => {
+  state.settings.incorrectPerTrick = e.target.checked; updateSettingsExamples();
+};
+
+function saveSettings() {
+  saveGame();
+  document.getElementById('settingsModal').classList.remove('active');
+}
+
+// ─── NEW GAME ─────────────────────────────────────────────────────────────────
+document.getElementById('newGameBtn').onclick = () => {
+  document.getElementById('newGameModal').classList.add('active');
+};
+
+function confirmNewGame() {
+  closeModal();
+  resetGame();
+}
+
+function resetGame() {
+  game = null;
+  localStorage.removeItem('bb_game');
+  document.getElementById('newGameBtn').style.display = 'none';
+  state.players = ['', '', '', ''];
+  state.minCards = 1;
+  state.maxCards = 8;
+  state.firstDealerIndex = 0;
+  renderSetup();
+  showScreen('setup');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+});
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderSetup();
+loadGame();
+</script>
+</body>
+</html>
