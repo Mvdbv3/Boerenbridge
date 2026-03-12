@@ -582,6 +582,26 @@
     .dragging { opacity: 0.4; }
     .drag-over { border-top: 2px solid var(--accent); }
 
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f0f0f5;
+        --surface: #ffffff;
+        --surface2: #e8e8f0;
+        --surface3: #dcdce8;
+        --accent: #c9a800;
+        --accent2: #3b6fd4;
+        --green: #16a34a;
+        --orange: #ea6c00;
+        --red: #dc2626;
+        --text: #1a1a2e;
+        --text2: #60608a;
+        --border: rgba(0,0,0,0.09);
+      }
+      html, body { background: #f0f0f5; }
+      .topbar { background: #f0f0f5; }
+      meta[name="theme-color"] { content: #f0f0f5; }
+    }
+
     /* TEAM DUIK ANIMATIE */
     #duikOverlay {
       display: none;
@@ -763,7 +783,7 @@
 <div id="duikOverlay" onclick="closeDuik()">
   <div class="wave"></div>
   <div class="wave wave2"></div>
-  <div class="duik-title">🌊 Team Duik!</div>
+  <div class="duik-title">🫧 Team Blub!</div>
   <div class="duik-name" id="duikName"></div>
   <div class="duik-sub" id="duikSub"></div>
   <div class="duik-diver">🤿</div>
@@ -1196,49 +1216,37 @@ function renderTricksPhase(round, ri) {
   return html;
 }
 
-function setBid(playerIdx, value) { game.rounds[game.currentRoundIndex].entries[playerIdx].bid = value; saveGame(); renderGame(); }
-function setTricks(playerIdx, value) { game.rounds[game.currentRoundIndex].entries[playerIdx].tricks = value; saveGame(); renderGame(); }
-function proceedToTricks() { game.rounds[game.currentRoundIndex].phase = 'tricks'; saveGame(); renderGame(); }
+function setBid(playerIdx, value) {
+  game.rounds[game.currentRoundIndex].entries[playerIdx].bid = value;
+  saveGame();
 
-function finishRound() {
-  const ri = game.currentRoundIndex;
-  const round = game.rounds[ri];
-  if (round.entries.reduce((s, e) => s + (e.tricks ?? 0), 0) !== round.cards) return;
-  game.rounds[ri].phase = 'completed';
-  game.currentRoundIndex++;
-
-  // Check wie 3x op rij 0 geboden én gehaald heeft
-  const duikers = [];
-  game.players.forEach((name, pi) => {
-    const completedSoFar = game.rounds.filter(r => r.phase === 'completed');
-    if (completedSoFar.length >= 3) {
-      const last3 = completedSoFar.slice(-3);
-      const all3zero = last3.every(r => r.entries[pi].bid === 0);
-      if (all3zero) duikers.push({ name, pi });
+  // Check of deze speler nu 3x op rij 0 heeft geboden
+  if (value === 0) {
+    const ri = game.currentRoundIndex;
+    const completedRounds = game.rounds.filter(r => r.phase === 'completed');
+    if (completedRounds.length >= 2) {
+      const last2 = completedRounds.slice(-2);
+      const prev2zero = last2.every(r => r.entries[playerIdx].bid === 0);
+      if (prev2zero) {
+        // Bereken streak
+        let streak = 1;
+        for (let i = completedRounds.length - 1; i >= 0; i--) {
+          if (completedRounds[i].entries[playerIdx].bid === 0) streak++;
+          else break;
+        }
+        showBlub(game.players[playerIdx], streak);
+      }
     }
-  });
-
-  if (game.currentRoundIndex >= game.rounds.length) {
-    saveGame();
-    if (duikers.length > 0) showDuik(duikers, true);
-    else finishGame();
-  } else {
-    saveGame();
-    if (duikers.length > 0) showDuik(duikers, false);
-    else renderGame();
   }
+
+  renderGame();
 }
 
-let duikCallback = null;
-
-function showDuik(duikers, isGameOver) {
-  const names = duikers.map(d => d.name).join(' & ');
-  const streak = getZeroStreak(duikers[0].pi);
-  document.getElementById('duikName').textContent = names;
+function showBlub(name, streak) {
+  document.getElementById('duikName').textContent = name;
   document.getElementById('duikSub').textContent = `${streak}x op rij 0 geboden 🫧`;
-  duikCallback = isGameOver ? finishGame : renderGame;
+  duikCallback = null; // geen callback, spel gaat gewoon door na tikken
 
-  // Maak bubbels
   const overlay = document.getElementById('duikOverlay');
   overlay.querySelectorAll('.bubble').forEach(b => b.remove());
   for (let i = 0; i < 18; i++) {
@@ -1249,6 +1257,18 @@ function showDuik(duikers, isGameOver) {
     overlay.appendChild(b);
   }
   overlay.classList.add('active');
+}
+function setTricks(playerIdx, value) { game.rounds[game.currentRoundIndex].entries[playerIdx].tricks = value; saveGame(); renderGame(); }
+function proceedToTricks() { game.rounds[game.currentRoundIndex].phase = 'tricks'; saveGame(); renderGame(); }
+
+function finishRound() {
+  const ri = game.currentRoundIndex;
+  const round = game.rounds[ri];
+  if (round.entries.reduce((s, e) => s + (e.tricks ?? 0), 0) !== round.cards) return;
+  game.rounds[ri].phase = 'completed';
+  game.currentRoundIndex++;
+  if (game.currentRoundIndex >= game.rounds.length) finishGame();
+  else { saveGame(); renderGame(); }
 }
 
 function getZeroStreak(pi) {
@@ -1264,7 +1284,6 @@ function getZeroStreak(pi) {
 
 function closeDuik() {
   document.getElementById('duikOverlay').classList.remove('active');
-  if (duikCallback) { duikCallback(); duikCallback = null; }
 }
 
 // ── SCOREBORD - kaartjes per speler ──
@@ -1386,6 +1405,15 @@ function showScreen(name) {
 
 renderSetup();
 loadGame();
+
+// Pas theme-color aan op basis van dark/light mode
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+const mq = window.matchMedia('(prefers-color-scheme: light)');
+function updateThemeColor(e) {
+  themeMeta.content = e.matches ? '#f0f0f5' : '#1a1a2e';
+}
+updateThemeColor(mq);
+mq.addEventListener('change', updateThemeColor);
 </script>
 </body>
 </html>
