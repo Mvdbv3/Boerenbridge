@@ -581,6 +581,114 @@
 
     .dragging { opacity: 0.4; }
     .drag-over { border-top: 2px solid var(--accent); }
+
+    /* TEAM DUIK ANIMATIE */
+    #duikOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: linear-gradient(180deg, #0a3d6b 0%, #0d6efd22 40%, #06b6d4 100%);
+      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #duikOverlay.active { display: flex; }
+
+    .duik-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: white;
+      text-align: center;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      animation: duikPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      opacity: 0;
+      z-index: 2;
+    }
+    .duik-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #7dd3fc;
+      margin-top: 8px;
+      text-align: center;
+      animation: duikPop 0.5s 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      opacity: 0;
+      z-index: 2;
+    }
+    .duik-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 6px;
+      animation: duikPop 0.5s 0.25s ease forwards;
+      opacity: 0;
+      z-index: 2;
+    }
+    .duik-diver {
+      font-size: 80px;
+      margin-top: 24px;
+      animation: duikFall 1.2s 0.3s ease-in forwards;
+      opacity: 0;
+      z-index: 2;
+    }
+    @keyframes duikPop {
+      from { opacity: 0; transform: scale(0.7) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes duikFall {
+      0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+      60%  { opacity: 1; transform: translateY(60px) rotate(15deg); }
+      100% { opacity: 0.3; transform: translateY(140px) rotate(20deg); }
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      animation: bubbleRise linear infinite;
+      bottom: -60px;
+    }
+    @keyframes bubbleRise {
+      0%   { transform: translateY(0) scale(1); opacity: 0.7; }
+      80%  { opacity: 0.5; }
+      100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+    }
+
+    .wave {
+      position: absolute;
+      bottom: 0; left: -10%;
+      width: 120%;
+      height: 120px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50% 50% 0 0;
+      animation: waveMove 3s ease-in-out infinite alternate;
+    }
+    .wave2 {
+      bottom: 10px;
+      background: rgba(255,255,255,0.05);
+      animation-delay: -1.5s;
+    }
+    @keyframes waveMove {
+      from { transform: translateX(-4%); }
+      to   { transform: translateX(4%); }
+    }
+
+    .duik-tap {
+      position: absolute;
+      bottom: 60px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      animation: duikPop 0.5s 1.5s ease forwards, blink 1.5s 2s ease-in-out infinite;
+      opacity: 0;
+      z-index: 2;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.15; }
+    }
   </style>
 </head>
 <body>
@@ -649,6 +757,17 @@
     <div id="finishedContent"></div>
     <button class="btn btn-primary" onclick="resetGame()">Nieuw spel</button>
   </div>
+</div>
+
+<!-- Team Duik overlay -->
+<div id="duikOverlay" onclick="closeDuik()">
+  <div class="wave"></div>
+  <div class="wave wave2"></div>
+  <div class="duik-title">🌊 Team Duik!</div>
+  <div class="duik-name" id="duikName"></div>
+  <div class="duik-sub" id="duikSub"></div>
+  <div class="duik-diver">🤿</div>
+  <div class="duik-tap">Tik om verder te gaan</div>
 </div>
 
 <!-- Modal: nieuw spel -->
@@ -951,10 +1070,23 @@ function renderBiddingPhase(round, ri) {
   const isFull = totalBids === round.cards && filledCount < game.players.length;
 
   const bannerClass = isFull ? 'warn' : '';
-  const statusText = filledCount < game.players.length
-    ? (remaining === 0 ? '⚠️ Vol!' : (remaining > 0 ? `+${remaining} vrij` : `${remaining} over`))
-    : 'Iedereen geboden';
-  const statusColor = isFull ? 'color:var(--orange)' : (remaining < 0 ? 'color:var(--red)' : 'color:var(--green)');
+  let statusText, statusColor;
+  if (filledCount < game.players.length) {
+    statusText = remaining === 0 ? '⚠️ Vol!' : (remaining > 0 ? `+${remaining} vrij` : `${remaining} over`);
+    statusColor = isFull ? 'color:var(--orange)' : (remaining < 0 ? 'color:var(--red)' : 'color:var(--green)');
+  } else {
+    const diff = round.cards - totalBids;
+    if (diff === 0) {
+      statusText = '⚠️ Precies geboden';
+      statusColor = 'color:var(--orange)';
+    } else if (diff > 0) {
+      statusText = `${diff} onderboden`;
+      statusColor = 'color:var(--green)';
+    } else {
+      statusText = `${Math.abs(diff)} overboden`;
+      statusColor = 'color:var(--red)';
+    }
+  }
 
   let html = `<div class="totals-banner ${bannerClass}">
     <div>
@@ -1074,11 +1206,66 @@ function finishRound() {
   if (round.entries.reduce((s, e) => s + (e.tricks ?? 0), 0) !== round.cards) return;
   game.rounds[ri].phase = 'completed';
   game.currentRoundIndex++;
-  if (game.currentRoundIndex >= game.rounds.length) finishGame();
-  else { saveGame(); renderGame(); }
+
+  // Check wie 3x op rij 0 geboden én gehaald heeft
+  const duikers = [];
+  game.players.forEach((name, pi) => {
+    const completedSoFar = game.rounds.filter(r => r.phase === 'completed');
+    if (completedSoFar.length >= 3) {
+      const last3 = completedSoFar.slice(-3);
+      const all3zero = last3.every(r => r.entries[pi].bid === 0);
+      if (all3zero) duikers.push({ name, pi });
+    }
+  });
+
+  if (game.currentRoundIndex >= game.rounds.length) {
+    saveGame();
+    if (duikers.length > 0) showDuik(duikers, true);
+    else finishGame();
+  } else {
+    saveGame();
+    if (duikers.length > 0) showDuik(duikers, false);
+    else renderGame();
+  }
 }
 
-function finishGame() { game.isFinished = true; saveGame(); showScreen('finished'); renderFinished(); }
+let duikCallback = null;
+
+function showDuik(duikers, isGameOver) {
+  const names = duikers.map(d => d.name).join(' & ');
+  const streak = getZeroStreak(duikers[0].pi);
+  document.getElementById('duikName').textContent = names;
+  document.getElementById('duikSub').textContent = `${streak}x op rij 0 geboden 🫧`;
+  duikCallback = isGameOver ? finishGame : renderGame;
+
+  // Maak bubbels
+  const overlay = document.getElementById('duikOverlay');
+  overlay.querySelectorAll('.bubble').forEach(b => b.remove());
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 10 + Math.random() * 30;
+    b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${3+Math.random()*5}s;animation-delay:${Math.random()*4}s`;
+    overlay.appendChild(b);
+  }
+  overlay.classList.add('active');
+}
+
+function getZeroStreak(pi) {
+  const completed = game.rounds.filter(r => r.phase === 'completed');
+  let streak = 0;
+  for (let i = completed.length - 1; i >= 0; i--) {
+    const e = completed[i].entries[pi];
+    if (e.bid === 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function closeDuik() {
+  document.getElementById('duikOverlay').classList.remove('active');
+  if (duikCallback) { duikCallback(); duikCallback = null; }
+}
 
 // ── SCOREBORD - kaartjes per speler ──
 function renderScoreboard() {
